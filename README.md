@@ -1,2 +1,2 @@
-# microTemplate
-Template project designed for micro controllers to provide a basic comms protocol and architecture
+# Bloodhound
+Teensy 3.2 based UART sniffer for debugging UART communications between legacy devices

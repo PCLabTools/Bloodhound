@@ -8,7 +8,6 @@
  * 
  *    *IDN?   - Identity
  *    *ECHO   - Echo Data
- *    *STS?   - Query Available States
  *    *RST    - Reset
  *    *TST?   - Self-Test
  *    *ERR?   - Error
@@ -16,6 +15,9 @@
  *    *CLR    - Clear Error Status
  *    *TIME?  - Query Current Time
  *    *SYNC   - Syncrhonise Time Clock
+ *    BAUD    - Set BAUD Rate
+ *    BAUD?   - Get BAUD Rate
+ *    BYTES?  - Get Total Bytes Sniffed
  * 
  **/
 
@@ -38,24 +40,6 @@ void handleMessage(Stream &STREAM, Message MESSAGE) {
   else if (MESSAGE.state == "*echo") {
     STREAM.println(MESSAGE.data[0]);
   } 
-
-  /*************************************************************************
-      State       : *STS?
-      Parameters  : -
-      Description : Queries the available states
-  *************************************************************************/
-  else if (MESSAGE.state == "*sts?" || MESSAGE.state == "?") {
-    STREAM.println("*IDN?   - Query Identity");
-    STREAM.println("*ECHO   - Echo Data");
-    STREAM.println("*STS?   - Query Available States");
-    STREAM.println("*RST    - Reset Device");
-    STREAM.println("*TST?   - Perform Self Test");
-    STREAM.println("*AST    - Assert Error");
-    STREAM.println("*ERR?   - Query System Error");
-    STREAM.println("*CLR    - Clear System Error");
-    STREAM.println("*TIME?  - Get Current Target Time");
-    STREAM.println("*SYNC   - Syncrhonise MCU Time");
-  }
 
   /*************************************************************************
       State       : *RST
@@ -125,6 +109,37 @@ void handleMessage(Stream &STREAM, Message MESSAGE) {
   else if (MESSAGE.state == "*sync") {
     setTime(MESSAGE.data[0].toInt(), MESSAGE.data[1].toInt(), MESSAGE.data[2].toInt(), MESSAGE.data[3].toInt(), MESSAGE.data[4].toInt(), MESSAGE.data[5].toInt());
     STREAM.println("Time Synchronised");
+  } 
+
+  /*************************************************************************
+      State       : BAUD
+      Parameters  : -
+      Description : Sets the sniffer's BAUD rate
+  *************************************************************************/
+  else if (MESSAGE.state == "*baud") {
+    Serial1.flush();
+    Serial1.begin(MESSAGE.data[0].toInt());
+    Serial2.flush();
+    Serial2.begin(MESSAGE.data[0].toInt());
+    COMMS_BAUD_RATE = MESSAGE.data[0].toInt();
+  } 
+
+  /*************************************************************************
+      State       : BAUD?
+      Parameters  : -
+      Description : Get the currently configured BAUD rate
+  *************************************************************************/
+  else if (MESSAGE.state == "*baud?") {
+    STREAM.println(String(COMMS_BAUD_RATE));
+  } 
+
+  /*************************************************************************
+      State       : BYTES
+      Parameters  : -
+      Description : Gets the total number of sniffed bytes [TX,RX]
+  *************************************************************************/
+  else if (MESSAGE.state == "bytes") {
+    STREAM.println(String(TX_BYTES_TOTAL) + "," + String(RX_BYTES_TOTAL));
   } 
 
   /*************************************************************************
